@@ -1,6 +1,6 @@
 # BREAKING (THE) NEWS
 
-An interactive interface for exploring daily (German) news coverage across political spectrums, this project analyzes top news stories, identifies media blind spots, assesses sentiment, and uncovers interlinked topics to offer a comprehensive view of the day’s news landscape.
+An interactive interface for exploring daily (German) news coverage across **political spectrums**, this project analyzes top news stories, identifies media **blind spots**, assesses **sentiment**, and uncovers **interlinked topics** to offer a comprehensive view of the day’s news landscape.
 
 ## Features
 - **Top News Stories**: Shows the top news stories of the day and reporting frequency by media outlet.
