@@ -12,7 +12,7 @@ An interactive interface for exploring daily (German) news coverage across **pol
 ## Tech Stack
 - **Frontend**: Streamlit for the interactive user interface.
 - **Backend**: [Newscatcher API](https://www.newscatcherapi.com/), News API, Mediastack API, SQL (Google BigQuery) and Python
-- **Data**: GDELT (https://www.gdeltproject.org/), news articles obtained via news API
+- **Data**: [GDELT](https://www.gdeltproject.org/), news articles obtained via news API
 - **NLP & Sentiment Analysis**: Natural Language Processing techniques and sentiment models (e.g., VADER, BERT Transformers) for tone analysis.
 
 ## Planning
