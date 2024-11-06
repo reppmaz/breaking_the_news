@@ -20,7 +20,7 @@ An interactive interface for exploring daily (German) news coverage across polit
 - GDELT database connection/queries
 - Web scraping articles
 
-**Day 2-3: Set up data pipeline, cleaning data**
+**Day 2-3: Set up data pipeline & data cleaning**
 - Google BigQuery or Alternative
 - Combining recent data and historical data in one database
 - Cleaning full article content data (only proper results)
