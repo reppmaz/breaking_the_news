@@ -13,3 +13,22 @@ An interactive interface for exploring daily (German) news coverage across polit
 - **Frontend**: Streamlit for the interactive user interface.
 - **Backend & Data**: News API, Mediastack API, GDELT (for historical data), SQL (Google BigQuery) and Python.
 - **NLP & Sentiment Analysis**: Natural Language Processing techniques and sentiment models (e.g., VADER, BERT Transformers) for tone analysis.
+
+## Planning
+**Day 1-2: Securing Data sources**
+- APIs for recent Data
+- GDELT database connection/queries
+- Web scraping articles
+
+**Day 2-3: Set up data pipeline, cleaning data**
+- Google BigQuery or Alternative
+- Combining recent data and historical data in one database
+- Cleaning full article content data (only proper results)
+
+**Day 4-5: Analyzing & model training (e.g. BERT, roBERTa, Gemini)**
+- Topic classification
+- Related topic score
+- Political tendency
+- Sentiment
+
+**Day 6-7: Building streamlit interface**
