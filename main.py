@@ -56,7 +56,7 @@ selected_sources = [
 gdrive_file_id = '1TG72n_RXAr4QXqTNLgs6zjJmdAqCdSJb'  # Replace with your actual file ID on Google Drive
 
 gauth = GoogleAuth()
-gauth.LoadClientConfigFile("/Users/reppmazc/Downloads/client_secret_324543093347-3r8cn3fsgi5j756qm9bujo84gg0dqk8a.apps.googleusercontent.com.json")
+gauth.LoadClientConfigFile("x.json")
 gauth.LocalWebserverAuth()  # This will prompt you to authenticate the first time
 drive = GoogleDrive(gauth)
 
