@@ -43,7 +43,7 @@ print("-----------> all libs imported")
 # scraping new article data
 #--------------------------
 # Newscatcher API key
-api_key = "l40au4ss10KmRY7OT2BHdi06cn6Orqjnv67vY_vfga4"
+api_key = "x"
 url = "https://api.newscatcherapi.com/v2/latest_headlines"
 
 # Selected sources list
