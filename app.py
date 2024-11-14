@@ -273,7 +273,6 @@ fig.update_layout(
 # Display the heatmap in Streamlit
 st.plotly_chart(fig, use_container_width=True)
 
-
 #--------------
 # ABOUT SECTION
 #--------------
@@ -281,14 +280,20 @@ st.markdown("<p style='font-size:20px; color:#5b5b5c'><strong>Über das Projekt<
 
 with st.expander("Projektinformationen anzeigen"):
     st.markdown("""
-        **Datenquellen**: Diese Anwendung verwendet deutsche Nachrichtenartikel der letzten 12 Monate, gesammelt aus verschiedenen Medienquellen für eine breite Abdeckung.
+        Diese Informationen dienen der Transparenz und Nachvollziehbarkeit unserer Analyseprozesse. 
+
+        **Datenquellen**: Diese Anwendung verwendet deutsche Nachrichtenartikel der letzten 12 Monate:
+        - vom Gdelt Project: https://www.gdeltproject.org/
+        - und gesammelt über news APIs: NewsCatcher, NewsAPI, MediaStack
         
-        **Modelle zur Sentiment-Analyse**: Wir nutzen das VADER-Modell für schnelle Analysen sowie fortgeschrittene Transformer-basierte Modelle (z.B., BERT) für tiefere Einsichten in die Stimmung der Artikel.
-        
-        **Methodik**: 
-        - **Datenerfassung**: Nachrichtenartikel werden regelmäßig gesammelt und gefiltert.
-        - **NLP-Verarbeitung**: Themen, Stimmungen und Entitäten werden mit modernsten NLP-Algorithmen extrahiert.
-        - **Zielsetzung**: Einblicke in Nachrichtenberichterstattung und mögliche Tendenzen über politische Spektren hinweg zu bieten.
-        
-        Diese Informationen dienen der Transparenz und Nachvollziehbarkeit unserer Analyseprozesse.
+        **Methodik**
+        - **Themen Klassifizierung**: paraphrase-MiniLM-L6-v2 https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2
+        - **Politische Einordnung**: Medien wurden basierend auf 4 Quellen auf dem politischen Spektrum verordnet:
+            - https://interaktiv.tagesspiegel.de/lab/die-lieblingsmedien-der-parteien/
+            - https://uebermedien.de/93000/wieso-haben-zeitungen-eine-politische-ausrichtung/
+            - https://www.pewresearch.org/global/fact-sheet/datenblatt-nachrichtenmedien-und-politische-haltungen-in-deutschland/
+            - https://www.polkom.ifp.uni-mainz.de/files/2024/01/pm_perspektivenvielfalt.pdf
+        - **Blinderfleck-Analyse**: definiert als politische Ausrichtungen mit ≤10% Anteil an der Berichterstattung zum ausgewählten Thema
+        - **Stimmungs-Analyse**: XLM-RoBERTa-German-sentiment https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment
+        - **Verwandte Themen**: zeigt die 5 Themen mit den meisten (mind. 2) gemeinsamen Entitäten
     """)
