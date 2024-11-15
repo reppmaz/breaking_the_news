@@ -38,7 +38,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 nltk.download('stopwords')
 print("-----------> all libs imported")
 
-'''
 #--------------------------
 # scraping new article data
 #--------------------------
@@ -46,23 +45,22 @@ print("-----------> all libs imported")
 api_key = "x"
 url = "https://api.newscatcherapi.com/v2/latest_headlines"
 
-# Selected sources list
 selected_sources = [
     "stern.de", "sueddeutsche.de", "bild.de", "tagesspiegel.de",
     "faz.net", "express.de", "tagesschau.de", "spiegel.de",
     "morgenpost.de", "dw.de", "jungewelt.de", "jungefreiheit.de", "freitag.de", "taz.de"]
 
 # Google Drive setup
-gdrive_file_id = '1TG72n_RXAr4QXqTNLgs6zjJmdAqCdSJb'  # Replace with your actual file ID on Google Drive
+gdrive_file_id = '1TG72n_RXAr4QXqTNLgs6zjJmdAqCdSJb'  
 
 gauth = GoogleAuth()
 gauth.LoadClientConfigFile("x.json")
-gauth.LocalWebserverAuth()  # This will prompt you to authenticate the first time
+gauth.LocalWebserverAuth()  
 drive = GoogleDrive(gauth)
 
 # Function to scrape full article content using `newspaper3k`
 def scrape_article_content(url):
-    if not url:  # Check if the URL is None or an empty string
+    if not url: 
         print("Invalid URL provided.")
         return None
 
@@ -70,7 +68,7 @@ def scrape_article_content(url):
         article = Article(url)
         article.download()
         article.parse()
-        return article.text if article.text else None  # Ensure we return None if there's no content
+        return article.text if article.text else None  
     except Exception as e:
         print(f"Error scraping {url}: {e}")
         return None
@@ -81,16 +79,15 @@ def fetch_headlines_from_source(source):
         "x-api-key": api_key,
         "Accept": "application/json"}
     params = {
-        "sources": source,  # Specify the source
-        "lang": "de",  # Language set to German
-        "page_size": 10,  # Number of articles to fetch
+        "sources": source,  
+        "lang": "de", 
+        "page_size": 100,  
         "when": "24h"}
 
     # Make the API request
     response = requests.get(url, headers=headers, params=params)
 
     if response.status_code == 200:
-        # If successful, extract articles from the response
         articles = response.json().get("articles", [])
         if articles:
             articles_df = pd.DataFrame([{
@@ -109,11 +106,10 @@ def fetch_headlines_from_source(source):
         # Handle rate limit by sleeping and retrying
         print(f"Rate limit reached for {source}. Sleeping for 30 seconds.")
         time.sleep(30)  # Sleep for 30 seconds
-        return fetch_headlines_from_source(source)  # Retry the request
+        return fetch_headlines_from_source(source)  
     else:
-        # If there's an error with the request, print the error status
         print(f"Error fetching data for {source}. Status Code: {response.status_code}")
-        return pd.DataFrame()  # Return an empty DataFrame on error
+        return pd.DataFrame()  
 
 # Function to update and upload the CSV to Google Drive
 def update_and_upload_to_gdrive():
@@ -154,7 +150,6 @@ def update_and_upload_to_gdrive():
 # Run the process to update and upload data to Google Drive
 update_and_upload_to_gdrive()
 
-'''
 
 #--------------------------------------
 # cleaning freshly scraped article data
@@ -483,7 +478,6 @@ embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2", device=device)
 # Set up CountVectorizer for additional keyword representation
 vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=german_stopwords)
 
-# Initialize the BERTopic model with custom embeddings and a random state
 topic_model = BERTopic(
     language="german",
     embedding_model=embedding_model,
@@ -525,12 +519,10 @@ candidate_labels = [
 # Cutoff value for classification confidence
 cutoff_value = 0.50
 
-# Create a list to store assigned labels
 assigned_labels = []
 
 # Perform zero-shot classification for each topic representation
 for representation in topic_info['Representation']:
-    # Ensure representation is a string for classification
     if isinstance(representation, list):
         sequence_to_classify = " ".join(representation)
     else:
@@ -605,7 +597,6 @@ for topic, group in grouped:
     # combine all entities across articles for this topic
     all_entities = Counter()
     for entities in group['entities']:
-        # Convert the entities from string to dictionary if needed
         entity_dict = eval(entities) if isinstance(entities, str) else entities
         all_entities.update(entity_dict)
     
