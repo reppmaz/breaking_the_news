@@ -30,9 +30,9 @@ In an era dominated by media bubbles, "Breaking (The) News" enhances media liter
 ## Project Timeline
 
 - **Day 1-2**: Secure data sources (APIs, GDELT, scraping).
-- **Day 2-3**: Setup data pipeline and cleaning.
-- **Day 4-5**: Analysis and model training.
-- **Day 6-7**: Build the Streamlit interface.
+- **Day 2-4**: Setup data pipeline and cleaning.
+- **Day 5-7**: Analysis and model training.
+- **Day 8-9**: Build the Streamlit interface.
 
 ## Next Steps
 
