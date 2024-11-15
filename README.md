@@ -1,35 +1,48 @@
-# BREAKING (THE) NEWS
+# Breaking (The) News
 
-An interactive interface for exploring daily (German) news coverage across **political spectrums**, this project analyzes top news stories, identifies media **blind spots**, assesses **sentiment**, and uncovers **interlinked topics** to offer a comprehensive view of the day’s news landscape.
+An interactive dashboard for exploring daily German news across various political perspectives. The platform analyzes top stories, media blind spots, sentiment, and interrelated topics to offer a comprehensive view of the day's news landscape.
 
-## Features
-- **Top News Stories**: Shows the top news stories of the day and reporting frequency by media outlet.
-- **Political Spectrum Analysis**: Identifies the political spectrum of reporting media and highlights potential blind spots.
-- **Sentiment Analysis**: Uses NLP to determine the tone and focus of news coverage, helping to reveal bias and sentiment differences across political leanings.
-- **Related Topics Visualization**: Connects current topics to show hidden relationships in the news.
-- **Historical Perspective**: Analysis of histrical trends in reporting about specific news topics.
-  
+## Project Overview
+
+In an era dominated by media bubbles, "Breaking (The) News" enhances media literacy by revealing biases and connections in news. Using data from multiple sources, the project applies machine learning to help users explore current events and historical trends with transparency.
+
+## Key Features
+
+- **Top News Stories**: Displays top stories and reporting frequency by source.
+- **Political Spectrum Analysis**: Maps stories across the political spectrum, highlighting blind spots.
+- **Sentiment Analysis**: NLP-based tone and bias detection across outlets.
+- **Related Topics Visualization**: Connects trending topics for deeper insights.
+- **Historical Perspective**: Tracks changes in topic reporting over time.
+
 ## Tech Stack
-- **Frontend**: Streamlit for the interactive user interface.
-- **Backend**: [Newscatcher API](https://www.newscatcherapi.com/), News API, Mediastack API, SQL (Google BigQuery) and Python
-- **Data**: [GDELT](https://www.gdeltproject.org/), news articles obtained via news API
-- **NLP & Sentiment Analysis**: Natural Language Processing techniques and sentiment models (e.g., VADER, BERT Transformers) for tone analysis.
 
-## Planning
-**Day 1-2: Securing Data sources**
-- APIs for recent Data
-- GDELT database connection/queries
-- Web scraping articles
+- **Frontend**: Streamlit for the user interface.
+- **Backend**: Google BigQuery, Newscatcher API, News API, Mediastack API.
+- **Data Sources**: GDELT for historical data; APIs and web scraping for real-time articles.
+- **NLP**: VADER, BERT, and RoBERTa for sentiment and topic modeling.
 
-**Day 2-3: Set up data pipeline & data cleaning**
-- Google BigQuery or Alternative
-- Combining recent data and historical data in one database
-- Cleaning full article content data (only proper results)
+## Data Workflow
 
-**Day 4-5: Analyzing & model training (e.g. BERT, roBERTa, Gemini)**
-- Topic classification
-- Related topic score
-- Political tendency
-- Sentiment
+1. **Data Sourcing**: API calls (~300/day), GDELT queries, and web scraping (~38,000 articles).
+2. **Data Cleaning**: Language filtering, deduplication, removal of irrelevant text and symbols.
+3. **Analysis**: Sentiment analysis, topic modeling, and political spectrum classification.
 
-**Day 6-7: Building streamlit interface**
+## Project Timeline
+
+- **Day 1-2**: Secure data sources (APIs, GDELT, scraping).
+- **Day 2-3**: Setup data pipeline and cleaning.
+- **Day 4-5**: Analysis and model training.
+- **Day 6-7**: Build the Streamlit interface.
+
+## Next Steps
+
+- Expand GDELT data for historical depth.
+- Automate API calls with cloud deployment.
+- Improve topic labeling and add search functionality.
+- Broaden source list for diverse media representation.
+
+## Installation and Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/reppmaz/breaking_the_news.git
