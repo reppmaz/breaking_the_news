@@ -46,3 +46,7 @@ In an era dominated by media bubbles, "Breaking (The) News" enhances media liter
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/reppmaz/breaking_the_news.git
+
+## Project Links
+
+[Presentation](https://docs.google.com/presentation/d/1lxwm64N-_AGfRvqF-qgQeYougpIizXZ4liRcaKDkHQo/edit?usp=sharing)
