@@ -19,7 +19,7 @@ def load_data(filepath):
 
 # load data
 #data_filepath = "/Users/reppmazc/Documents/IRONHACK/quests/final_project/breaking_news_data.csv"
-data_filepath = "/Users/reppmazc/Documents/IRONHACK/quests/final_project/combined_file_new.csv"
+data_filepath = "/Users/reppmazc/Documents/IRONHACK/quests/final_project/combined_file.csv"
 
 df = load_data(data_filepath)
 
@@ -46,7 +46,6 @@ with tab1:
     #--------------
     # PROJECT TITLE
     #--------------
-    st.markdown("<hr style='border:2px solid #FFF'>", unsafe_allow_html=True)
     st.title("BREAKING (THE) NEWS")
     st.markdown("<hr style='border:2px solid #FFF'>", unsafe_allow_html=True)
 
@@ -73,7 +72,7 @@ with tab1:
     selected_topic = st.radio("", options=top_10_topics, index=top_10_topics.index(top_topic))
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
-    # Sample articles selection by political leaning (use all data)
+    # Sample articles selection by political leaning (all data)
     selected_articles = []
     for leaning in pol_leaning_colors.keys():
         articles = df[(df['topic'] == selected_topic) & (df['pol_leaning'] == leaning)]
@@ -85,17 +84,17 @@ with tab1:
     with col1:
         st.subheader(f"Das wird über {selected_topic} gesagt:")
         
-        # Display the selected articles with links
+        # show selected articles with links
         for article in selected_articles:
             st.markdown(f"- [{article.iloc[0]['source']}]({article.iloc[0]['url']}) (eher {article.iloc[0]['pol_leaning']})")
         
-        # Calculate percentage of articles by political leaning, including leanings with 0%
+        # percentage of articles by political leaning
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
         pol_leaning_counts = pol_leaning_counts.reindex(pol_leaning_colors.keys(), fill_value=0)  # Ensure all leanings are included
         total_articles = pol_leaning_counts.sum()
         pol_leaning_percentages = (pol_leaning_counts / total_articles * 100).round(2)
 
-        # Check for any blind spots (pol_leaning with <= 10%)
+        # blind spots (pol_leaning with <= 10%)
         blind_spots = pol_leaning_percentages[pol_leaning_percentages <= 10]
         if not blind_spots.empty:
             st.markdown("<br>", unsafe_allow_html=True)  # empty line
@@ -110,16 +109,15 @@ with tab1:
     with col2:
         st.subheader(f"Wer berichtet wie viel über {selected_topic}:")
 
-        # Filter out 0 values and prepare data for the chart (use all data)
+        # filter out 0 values
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
         pol_leaning_counts = pol_leaning_counts[pol_leaning_counts > 0]  # Exclude 0 values
         labels, values = pol_leaning_counts.index, pol_leaning_counts.values
         colors = [pol_leaning_colors[leaning] for leaning in labels]
 
-        # Create the Plotly donut chart
+        # donut chart
         fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.3, marker=dict(colors=colors))])
 
-        # Update layout with adjusted legend position and moderate margins
         fig.update_layout(
             showlegend=True,
             legend=dict(orientation="v", yanchor="top", y=1, xanchor="right", x=1.2),  # Minor adjustment to x position
@@ -140,16 +138,15 @@ with tab1:
 
     with col1:
         st.markdown("<p style='font-size:16px'>Gesamtstimmung über alle Medien:</p>", unsafe_allow_html=True)
-        # Calculate sentiment counts without reindexing prematurely
+        # sentiment counts without reindexing prematurely
         total_sentiment_counts = df[df['topic'] == selected_topic]['sentiment'].value_counts()
         
-        # Only reindex if a sentiment category is missing
         for sentiment in ['negative', 'neutral', 'positive']:
             if sentiment not in total_sentiment_counts:
                 total_sentiment_counts[sentiment] = 0
         total_sentiment_counts = total_sentiment_counts[['negative', 'neutral', 'positive']]
 
-        # Create the bar chart for total sentiment
+        # bar chart for total sentiment
         fig = go.Figure(data=[
             go.Bar(
                 x=total_sentiment_counts.index,
@@ -166,7 +163,7 @@ with tab1:
 
     with col2:
         st.markdown("<p style='font-size:16px'>Stimmung nach Medium:</p>", unsafe_allow_html=True)
-        # Calculate sentiment counts by source without forcing reindex prematurely
+        # sentiment counts by source
         sentiment_counts = df[df['topic'] == selected_topic].groupby('source')['sentiment'].value_counts().unstack(fill_value=0)
         
         # Ensure all columns (sentiment categories) are included
@@ -175,7 +172,7 @@ with tab1:
                 sentiment_counts[sentiment] = 0
         sentiment_counts = sentiment_counts[['negative', 'neutral', 'positive']]  # Ensure order of sentiments
         
-        # Create a Plotly stacked bar chart for sentiment by source
+        # stacked bar chart for sentiment by source
         fig2 = go.Figure()
         for sentiment in sentiment_counts.columns:
             fig2.add_trace(
@@ -202,18 +199,18 @@ with tab1:
     # -------------------
     st.subheader(f"So oft wurde über {selected_topic} berichtet:")
 
-    # Filter out rows with NaN, invalid 'datetime' values, or years before 2023
+    # filter out rows with NaN, invalid 'datetime' values, or years before 2023
     df = df.dropna(subset=['datetime'])
     df = df[df['datetime'].str.match(r'^\d{8,}')]
     df['Datum'] = df['datetime'].str[:6]
 
-    # Filter to keep only rows with years >= 2023
+    # keep only rows with years >= 2023
     df = df[df['Datum'].str[:4].astype(int) >= 2023]
 
-    # Calculate total articles per source to normalize
+    # total articles per source for normalization
     total_articles_per_source = df[df['topic'] == selected_topic].groupby('source').size()
 
-    # Group by 'Datum' and 'source' to count articles and normalize by total count
+    # normalize by total count(per sources)
     monthly_topic_data = (
         df[df['topic'] == selected_topic]
         .groupby(['Datum', 'source'])
@@ -221,25 +218,19 @@ with tab1:
         .div(total_articles_per_source)  # Normalize by total articles per source
         .unstack(fill_value=0))
 
-    # Reshape data for plotting
     monthly_topic_data = monthly_topic_data.reset_index().melt(id_vars="Datum", var_name="Source", value_name="Relative Häufigkeit")
 
-    # Check if monthly_topic_data is empty after grouping
     if monthly_topic_data.empty:
         st.write("No data available for plotting after grouping by year and month.")
     else:
-        # Convert 'Datum' to a datetime object for a continuous x-axis
+        # convert date to datetime object
         monthly_topic_data['Datum'] = pd.to_datetime(monthly_topic_data['Datum'], format='%Y%m')
 
-        # Create the line plot with Plotly
-        fig = px.line(monthly_topic_data, x="Datum", y="Relative Häufigkeit", color="Source")
 
-        # Update x-axis to show each month
+        fig = px.line(monthly_topic_data, x="Datum", y="Relative Häufigkeit", color="Source")
         fig.update_xaxes(
             tickformat="%b %Y",
             dtick="M1")
-
-        # Display the plot in Streamlit
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
@@ -249,22 +240,21 @@ with tab1:
     # --------------
     st.subheader("Verwandte Themen")
 
-    # Initialize session state for selected related topic
     if 'related_topic_selected' not in st.session_state:
         st.session_state['related_topic_selected'] = selected_topic
 
-    # Extract related topics and filter based on overlapping entities
+    # find related topics
     related_topics = df.loc[df['topic'] == selected_topic, 'related_topics'].values[0]
     if isinstance(related_topics, str):
         related_topics = ast.literal_eval(related_topics)
 
-    # Filter related topics to include only those with at least 2 overlapping entities
+    # filter related topics to include > 2 overlapping entities
     related_topics = [t for t in related_topics if t[1] >= 2]
 
-    # Sort related topics by shared entity count (second element in each tuple) in descending order
+    # sort related topics by shared entity count
     related_topics = sorted(related_topics, key=lambda x: x[1], reverse=True)[:5]
 
-    # Custom CSS for button styling
+    # button styling
     st.markdown("""
         <style>
         .custom-button-container { 
@@ -289,14 +279,14 @@ with tab1:
         </style>
     """, unsafe_allow_html=True)
 
-    # Display styled buttons for related topics
+    # buttons for related topics
     st.markdown("<div class='custom-button-container'>", unsafe_allow_html=True)
     for topic_name, entity_count in related_topics:
         if st.button(f"{topic_name} (Gemeinsame Entitäten: {entity_count})"):
             st.session_state['related_topic_selected'] = topic_name
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Update selected_topic based on user selection
+    # ppdate selected_topic based on user selection
     selected_topic = st.session_state['related_topic_selected']
 
     st.markdown("<hr style='border:2px solid #FFF'>", unsafe_allow_html=True)
@@ -307,7 +297,6 @@ with tab1:
     # Analysis Code for the Selected Topic
     # -------------------------------------
     # Sample Articles Display
-
     col1, col2 = st.columns(2)
     with col1:
         st.subheader(f"Das wird über {selected_topic} gesagt:")
