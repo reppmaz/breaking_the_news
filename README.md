@@ -27,20 +27,6 @@ In an era dominated by media bubbles, "Breaking (The) News" enhances media liter
 2. **Data Cleaning**: Language filtering, deduplication, removal of irrelevant text and symbols.
 3. **Analysis**: Sentiment analysis, topic modeling, and political spectrum classification.
 
-## Project Timeline
-
-- **Day 1-2**: Secure data sources (APIs, GDELT, scraping).
-- **Day 2-4**: Setup data pipeline and cleaning.
-- **Day 5-7**: Analysis and model training.
-- **Day 8-9**: Build the Streamlit interface.
-
-## Next Steps
-
-- Expand GDELT data for historical depth.
-- Automate API calls with cloud deployment.
-- Improve topic labeling and add search functionality.
-- Broaden source list for diverse media representation.
-
 ## Installation and Setup
 
 1. **Clone the repository**:
