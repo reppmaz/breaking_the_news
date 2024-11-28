@@ -1,8 +1,0 @@
-name: breaking_the_news_minimal
-channels:
-  - conda-forge
-dependencies:
-  - python=3.9
-  - streamlit
-  - pandas
-  - plotly

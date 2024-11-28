@@ -14,8 +14,6 @@ import numpy as np
 import nltk
 from nltk.corpus import stopwords
 import torch
-print("CUDA available:", torch.cuda.is_available())
-print("CUDA device count:", torch.cuda.device_count())
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -34,10 +32,19 @@ import oauth2client
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from sklearn.feature_extraction.text import CountVectorizer
+import logging
+import subprocess
+
+# Configure logging to include timestamp
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    datefmt='%H:%M:%S')
 
 nltk.download('stopwords')
-print("-----------> all libs imported")
+logging.info("-----------> all libs imported")
 
+'''
 #--------------------------
 # scraping new article data
 #--------------------------
@@ -150,7 +157,7 @@ def update_and_upload_to_gdrive():
 # Run the process to update and upload data to Google Drive
 update_and_upload_to_gdrive()
 
-
+'''
 #--------------------------------------
 # cleaning freshly scraped article data
 #--------------------------------------
@@ -309,19 +316,19 @@ phrases_to_trim_after = [
 
 # remove specified snippets from within the content
 def remove_snippets(text):
-    if pd.notna(text):  # Ensure text is not NaN
+    if pd.notna(text):
         for snippet in non_article_snippets:
-            text = text.replace(snippet, '')  # Remove each snippet if it appears
+            text = text.replace(snippet, '')
     return text
 
 df['content'] = df['content'].apply(remove_snippets)
 
 # trim content after any of the specified phrases
 def trim_content(text):
-    if pd.notna(text):  # Ensure text is not NaN
+    if pd.notna(text):
         for phrase in phrases_to_trim_after:
             if phrase in text:
-                return text.split(phrase)[0]  # Keep only the part before the phrase
+                return text.split(phrase)[0]
     return text
 
 df['content'] = df['content'].apply(trim_content)
@@ -349,7 +356,7 @@ df = df.dropna()
 
 # create new source column from url
 #-----------------------------------
-df['source'] = df['url'].str.extract(r'\.(\w+)\.')
+df['source'] = df['url'].str.extract(r'https?://(?:www\.)?([\w-]+)\.')
 
 # removed any non-approved sources
 #-----------------------------------
@@ -374,7 +381,7 @@ allowed_sources = ["spiegel",
 
 df = df[df['source'].isin(allowed_sources)]
 
-print('-----------> cleaning done')
+logging.info('-----------> cleaning done')
 print(df['source'].value_counts())
 
 #-----------------------------------------
@@ -402,7 +409,7 @@ source_to_label = {"spiegel": "mitte_links",
 
 df['pol_leaning'] = df['source'].map(source_to_label)
 
-print('-----------> pol leaning done')
+logging.info('-----------> pol leaning done')
 
 #--------------------------------------------------------
 # preproc for topic classification and sentiment analysis
@@ -420,7 +427,7 @@ def preprocess_text(text):
     return ' '.join(tokens)
 
 df['processed_content'] = df['content'].apply(preprocess_text)
-print('-----------> preproc for classification and sentiment done')
+logging.info('-----------> preproc for classification and sentiment done')
 
 #-------------------
 # sentiment analysis
@@ -455,8 +462,9 @@ for start in range(0, len(df), batch_size):
 
 df['sentiment'] = sentiment_results
 
-print("-----------> sentiment analysis done")
+logging.info("-----------> sentiment analysis done")
 
+'''
 #---------------------
 # Topic Classification
 #---------------------
@@ -495,7 +503,7 @@ df['topic'] = topics
 # df['topic_probability'] = probabilities
 topic_info = topic_model.get_topic_info()
 
-print('-----------> topic classification done')
+logging.info('-----------> topic classification done')
 
 #------------------------
 # Improved topic labeling
@@ -543,12 +551,14 @@ for representation in topic_info['Representation']:
 topic_info['assigned_label'] = assigned_labels
 
 df = df.merge(topic_info[['Topic', 'assigned_label']], left_on='topic', right_on='Topic').drop(columns=['Topic'])
-print('-----------> improved labelling done')
+logging.info('-----------> improved labelling done')
 
+'''
 #------------------------------
 # getting and counting entities
 #------------------------------
 #python -m spacy download de_core_news_sm
+subprocess.run(["python", "-m", "spacy", "download", "de_core_news_sm"])
 
 # Load German model
 nlp = spacy.load("de_core_news_sm")
@@ -576,7 +586,7 @@ def count_entities(entities):
 # Apply the function to the 'entities' column and create the 'entity_counts' column
 df['entity_counts'] = df['entities'].apply(count_entities)
 
-print('-----------> entities done')
+logging.info('-----------> entities done')
 
 #---------------
 # rename columns
@@ -616,8 +626,9 @@ def find_related_topics(topic):
 # apply func to each row
 df['related_topics'] = df['topic'].apply(find_related_topics)
 
-print('-----------> related topics done')
+logging.info('-----------> related topics done')
 #---------------------------
 # merge with historical data
 #---------------------------
-print('-----------> doneeeeee')
+df.to_csv('test_2.csv')
+logging.info('-----------> doneeeeee')
