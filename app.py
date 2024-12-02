@@ -67,8 +67,8 @@ with tab1:
     # Custom CSS for styling
     st.markdown("""
         <style>
-        .stRadio > div { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .stRadio > div label { background-color: #5b5b5c; padding: 8px 12px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
+        .stRadio > div { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+        .stRadio > div label { background-color: #5b5b5c; padding: 8px 12px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
         .stRadio > div label:hover { background-color: #036acc; }
         .stRadio > div label[data-selected="true"] { background-color: #036acc; }
         </style>
@@ -79,21 +79,31 @@ with tab1:
     selected_topic = st.radio("", options=top_10_topics, index=top_10_topics.index(top_topic))
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
-    # Sample articles selection by political leaning (all data)
+    # Sample articles selection by political leaning (most recent)
     selected_articles = []
     for leaning in pol_leaning_colors.keys():
+        # Filter articles for the selected topic and political leaning
         articles = df[(df['topic'] == selected_topic) & (df['pol_leaning'] == leaning)]
         if not articles.empty:
-            selected_articles.append(articles.sample(1))
+            # Sort articles by datetime in descending order and select the most recent one
+            most_recent_article = articles.sort_values(by='datetime', ascending=False).iloc[0]
+            selected_articles.append(most_recent_article)
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader(f"Das wird über {selected_topic} gesagt:")
-        
-        # show selected articles with links
+
+
+        # Show selected articles with formatted links
+        formatted_articles = ""
         for article in selected_articles:
-            st.markdown(f"- [{article.iloc[0]['source']}]({article.iloc[0]['url']}) (eher {article.iloc[0]['pol_leaning']})")
+            formatted_articles += f"""
+                <p style='font-size:30px'>- <a href='{article["url"]}' target='_blank' style='color:white;'>{article["source"]}</a> (eher {article["pol_leaning"]})</p>
+            """
+
+        # Display the formatted articles
+        st.markdown(formatted_articles, unsafe_allow_html=True)
 
         # percentage of articles by political leaning
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
@@ -101,19 +111,29 @@ with tab1:
         total_articles = pol_leaning_counts.sum()
         pol_leaning_percentages = (pol_leaning_counts / total_articles * 100).round(2)
 
-        # blind spots (pol_leaning with <= 10%)
+
+        # Blind spots (pol_leaning with <= 10%)
         blind_spots = pol_leaning_percentages[pol_leaning_percentages <= 10]
         if not blind_spots.empty:
-            st.markdown("<br>", unsafe_allow_html=True)  # empty line
+            st.markdown("<br>", unsafe_allow_html=True)  # Empty line
             st.markdown("### Blinder Fleck")
-            st.markdown("""<p style="font-size:20px;">Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>""",unsafe_allow_html=True)
+            st.markdown("""<p style="font-size:30px;">Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>""", unsafe_allow_html=True)
 
+            # Format blind spots with HTML
+            formatted_blind_spots = ""
             for leaning, pct in blind_spots.items():
                 if pct == 0.0:
-                    st.markdown(f"""<div style="font-size:20px; line-height:1.5;">- <b>{leaning}</b> mit gar keiner Berichterstattung</div>""", unsafe_allow_html=True)
-
+                    formatted_blind_spots += f"""
+                        <p style="font-size:30px; line-height:1.5;">- <b>{leaning}</b> mit gar keiner Berichterstattung</p>
+                    """
                 else:
-                    st.write(f"- **{leaning}** mit nur **{pct}%** der Berichterstattung")
+                    formatted_blind_spots += f"""
+                        <p style="font-size:30px; line-height:1.5;">- <b>{leaning}</b> mit nur <b>{pct}%</b> der Berichterstattung</p>
+                    """
+
+            # Display the formatted blind spots
+            st.markdown(formatted_blind_spots, unsafe_allow_html=True)
+
 
     with col2:
         st.subheader(f"Wer berichtet wie viel über {selected_topic}:")
@@ -125,18 +145,32 @@ with tab1:
         colors = [pol_leaning_colors[leaning] for leaning in labels]
 
         # donut chart
-        fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.3, marker=dict(colors=colors))])
+        fig = go.Figure(data=[
+            go.Pie(
+                labels=labels,
+                values=values,
+                hole=0.3,
+                marker=dict(colors=colors),
+                textinfo='percent',
+                textfont=dict(size=20)
+            )
+        ])
 
-        fig.update_layout(showlegend=True,
-                          legend=dict(orientation="v",
-                                      yanchor="top",
-                                      y=1,
-                                      xanchor="right",
-                                      x=1.2,
-                                      font=dict(size=19)),
-                                      margin=dict(t=40, b=40, l=40, r=40),
-                                      paper_bgcolor="#0e1214",
-                                      font=dict(color="#f8f8fa"))
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(
+                orientation="v",
+                yanchor="top",
+                y=1,
+                xanchor="right",
+                x=1.2,
+                font=dict(size=30)
+            ),
+            margin=dict(t=40, b=40, l=40, r=40),
+            paper_bgcolor="#0e1214",
+            font=dict(color="#f8f8fa")
+        )
+
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
@@ -150,7 +184,7 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("<p style='font-size:20px'>Gesamtstimmung über alle Medien:</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:30px;'>Gesamtstimmung über alle Medien:</p>", unsafe_allow_html=True)
         # sentiment counts without reindexing prematurely
         total_sentiment_counts = df[df['topic'] == selected_topic]['sentiment'].value_counts()
         
@@ -168,11 +202,11 @@ with tab1:
         fig.update_layout(
             xaxis=dict(
                 title="",
-                titlefont=dict(size=20),
-                tickfont=dict(size=20)),
+                titlefont=dict(size=30),
+                tickfont=dict(size=30)),
                 yaxis=dict(
                 title="Anzahl der Artikel",
-                titlefont=dict(size=20)),
+                titlefont=dict(size=30)),
             paper_bgcolor="#0e1214",
             plot_bgcolor="#0e1214",
             font=dict(color="#f8f8fa"),
@@ -182,7 +216,8 @@ with tab1:
 
 
     with col2:
-        st.markdown("<p style='font-size:20px'>Stimmung nach Medium:</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:30px;'>Stimmung nach Medium:</p>", unsafe_allow_html=True)
+        
         # sentiment counts by source
         sentiment_counts = df[df['topic'] == selected_topic].groupby('source')['sentiment'].value_counts().unstack(fill_value=0)
         
@@ -203,16 +238,16 @@ with tab1:
                     marker_color=sentiment_colors[sentiment]))
 
         fig2.update_layout(xaxis=dict(title="",
-                                      tickfont=dict(size=20)),
+                                      tickfont=dict(size=30)),
                                       yaxis=dict(title="Anzahl der Artikel",
-                                                 titlefont=dict(size=20),
-                                                 tickfont=dict(size=20)),
+                                                 titlefont=dict(size=30),
+                                                 tickfont=dict(size=30)),
                                                  barmode="stack",
                                                  paper_bgcolor="#0e1214",
                                                  plot_bgcolor="#0e1214",
                                                  font=dict(color="#f8f8fa"),
                                                  legend=dict(title="",
-                                                             font=dict(size=20)))
+                                                             font=dict(size=30)))
         st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
@@ -244,7 +279,7 @@ with tab1:
     monthly_topic_data = monthly_topic_data.reset_index().melt(id_vars="Datum", var_name="Source", value_name="Relative Häufigkeit")
 
     if monthly_topic_data.empty:
-        st.write("No data available for plotting after grouping by year and month.")
+        st.write("Keine Daten Verfügbar.")
     else:
         monthly_topic_data['Datum'] = pd.to_datetime(monthly_topic_data['Datum'], format='%Y%m')
 
@@ -253,15 +288,15 @@ with tab1:
 
         # Update axes and layout
         fig.update_xaxes(
-            title=dict(text="Datum", font=dict(size=20)),
-            tickfont=dict(size=20),
+            title=dict(text="Datum", font=dict(size=30)),
+            tickfont=dict(size=30),
             tickformat="%b %Y",
             dtick="M1")
         fig.update_yaxes(title=dict(text="Relative Häufigkeit",
-                                    font=dict(size=20)),
-                                    tickfont=dict(size=20))
-        fig.update_layout(legend=dict(title=dict(text="Source", font=dict(size=20)), 
-                font=dict(size=20)),
+                                    font=dict(size=30)),
+                                    tickfont=dict(size=30))
+        fig.update_layout(legend=dict(title=dict(text="Source", font=dict(size=30)), 
+                font=dict(size=30)),
                 paper_bgcolor="#0e1214",
                 plot_bgcolor="#0e1214",
                 font=dict(color="#f8f8fa"))
@@ -304,8 +339,8 @@ with tab1:
             color: white;
             font-weight: bold;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 10px 30px;
+            border-radius: 30px;
             transition: background-color 0.2s ease;
             cursor: pointer;
         }
@@ -330,7 +365,7 @@ with tab1:
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
     # Font size settings for all plots
-    FONT_SIZE = 20
+    FONT_SIZE = 30
 
     # -------------------------------------
     # Analysis Code for the Selected Topic
@@ -340,14 +375,26 @@ with tab1:
     col1, col2 = st.columns(2)
     with col1:
         st.subheader(f"Das wird über {selected_topic} gesagt:")
-        selected_articles = []
+        
+        # Initialize formatted HTML for displaying articles
+        formatted_articles = ""
+
         for leaning in pol_leaning_colors.keys():
+            # Filter articles for the selected topic and political leaning
             articles = df[(df['topic'] == selected_topic) & (df['pol_leaning'] == leaning)]
             if not articles.empty:
-                selected_articles.append(articles.sample(1))
+                # Select the most recent article
+                most_recent_article = articles.sort_values(by='datetime', ascending=False).iloc[0]
 
-        for article in selected_articles:
-            st.markdown(f"- [{article.iloc[0]['source']}]({article.iloc[0]['url']}) (eher {article.iloc[0]['pol_leaning']})")
+                # Add formatted article to the string
+                formatted_articles += f"""
+                    <p style='font-size:30px'>- <a href='{most_recent_article["url"]}' target='_blank' style='color:white;'>{most_recent_article["source"]}</a> (eher {most_recent_article["pol_leaning"]})</p>
+                """
+        
+        # Display formatted articles
+        st.markdown(formatted_articles, unsafe_allow_html=True)
+
+
 
         # Blind Spot Analysis
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
@@ -360,13 +407,24 @@ with tab1:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("### Blinder Fleck")
             st.markdown(
-                f"<p style='font-size:{FONT_SIZE}px;'>Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>",
+                f"<p style='font-size:30px;'>Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>",
                 unsafe_allow_html=True)
+
+            # Initialize formatted text for blind spots
+            formatted_blind_spots = ""
             for leaning, pct in blind_spots.items():
                 if pct == 0.0:
-                    st.write(f"- **{leaning}** mit gar keiner Berichterstattung")
+                    formatted_blind_spots += f"""
+                        <p style='font-size:30px;'>- <b>{leaning}</b> mit gar keiner Berichterstattung</p>
+                    """
                 else:
-                    st.write(f"- **{leaning}** mit nur **{pct}%** der Berichterstattung")
+                    formatted_blind_spots += f"""
+                        <p style='font-size:30px;'>- <b>{leaning}</b> mit nur <b>{pct}%</b> der Berichterstattung</p>
+                    """
+
+            # Display formatted blind spots
+            st.markdown(formatted_blind_spots, unsafe_allow_html=True)
+
 
     with col2:
         # Political Leaning Distribution for Selected Topic
@@ -375,7 +433,7 @@ with tab1:
         labels, values = pol_leaning_counts.index, pol_leaning_counts.values
         colors = [pol_leaning_colors[leaning] for leaning in labels]
 
-        fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.3, marker=dict(colors=colors))])
+        fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.3, marker=dict(colors=colors), textfont=dict(size=30))])
         fig.update_layout(
             showlegend=True,
             legend=dict(
@@ -387,7 +445,7 @@ with tab1:
                 font=dict(size=19)),
             margin=dict(t=40, b=40, l=40, r=40),
             paper_bgcolor="#0e1214",
-            font=dict(color="#f8f8fa", size=15))
+            font=dict(color="#f8f8fa", size=30))
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
@@ -397,7 +455,7 @@ with tab1:
     st.subheader(f"So ist die Stimmung zu {selected_topic}:")
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown(f"<p style='font-size:{FONT_SIZE}px;'>Gesamtstimmung über alle Medien:</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:30px;'>Gesamtstimmung über alle Medien:</p>", unsafe_allow_html=True)
         total_sentiment_counts = df[df['topic'] == selected_topic]['sentiment'].value_counts()
         for sentiment in ['negative', 'neutral', 'positive']:
             if sentiment not in total_sentiment_counts:
@@ -417,7 +475,7 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown(f"<p style='font-size:{FONT_SIZE}px;'>Stimmung nach Medium:</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:30px;'>Stimmung nach Medium:</p>", unsafe_allow_html=True)
         sentiment_counts = df[df['topic'] == selected_topic].groupby('source')['sentiment'].value_counts().unstack(fill_value=0)
         for sentiment in ['negative', 'neutral', 'positive']:
             if sentiment not in sentiment_counts.columns:
@@ -480,130 +538,142 @@ with tab2:
     # ABOUT SECTION
     # --------------
     # Add main section header
+    st.title("BREAKING (THE) NEWS")
     st.markdown("<hr style='border:2px solid #FFF'>", unsafe_allow_html=True)
-    st.markdown("<h1 style='font-size:30px; color:#f8f8fa'>BREAKING (THE) NEWS</h1>", unsafe_allow_html=True)
-    st.markdown("<hr style='border:2px solid #FFF'>", unsafe_allow_html=True)
-    st.markdown("<h2 style='font-size:24px; color:#f8f8fa'>Über das Projekt</h2>", unsafe_allow_html=True)
 
     # Brief Introduction
     st.markdown("""
-        <p style='font-size:20px'>Diese Informationen dienen der Transparenz und Nachvollziehbarkeit unserer Analyseprozesse.</p>
+        <p style='font-size:30px'>Diese Informationen dienen der Transparenz und Nachvollziehbarkeit unserer Analyseprozesse.</p>
     """, unsafe_allow_html=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
     # Section: Datenquellen
-    st.markdown("<h2 style='font-size:20px; color:#5b5b5c'>Datenquellen</h2>", unsafe_allow_html=True)
+    st.header("Datenquellen")
+    st.markdown("<hr style='border:2px solid #5b5b5c'>", unsafe_allow_html=True)  # Section divider
     st.markdown("""
-        <p style='font-size:20px'>Diese Anwendung verwendet deutsche Nachrichtenartikel der letzten 12 Monate:</p>
-        <ul style='font-size:20px'>
-            <li>vom Gdelt Project: <a href='https://www.gdeltproject.org/' target='_blank'>https://www.gdeltproject.org/</a></li>
-            <li>gesammelt über news APIs: NewsCatcher, NewsAPI, MediaStack</li>
-        </ul>
+        <p style='font-size:30px'>Diese Anwendung verwendet deutsche Nachrichtenartikel der letzten 12 Monate:</p>
+        <p style='font-size:30px'>- <a href='https://www.gdeltproject.org' target='_blank' style='color:white;'>Gdelt Project</a></p>
+        <p style='font-size:30px'>- News APIs: NewsCatcher, NewsAPI, MediaStack</p>
+
     """, unsafe_allow_html=True)
 
     # Divider
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
     # Section: Methodik
-    st.markdown("<h2 style='font-size:20px; color:#5b5b5c'>Methodik</h2>", unsafe_allow_html=True)
+    # Section: Methodik
+    st.header("Methodik")
+    st.markdown("<hr style='border:2px solid #5b5b5c'>", unsafe_allow_html=True)  # Section divider
 
     # Subsection: Themen Klassifizierung
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Themen Klassifizierung</h3>", unsafe_allow_html=True)
+    st.subheader("Themen Klassifizierung")
     st.markdown("""
-        <p style='font-size:20px'>Modell: <a href='https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2' target='_blank'>paraphrase-MiniLM-L6-v2</a></p>
+        <p style='font-size:30px'>Modell: <a href='https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2' target='_blank' style='color:white;'>paraphrase-MiniLM-L6-v2</a></p>
     """, unsafe_allow_html=True)
+
+    # Divider for subsections
+    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
 
     # Subsection: Politische Einordnung
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Politische Einordnung</h3>", unsafe_allow_html=True)
+    st.subheader("Politische Einordnung")
     st.markdown("""
-        <p style='font-size:20px'>Medien wurden basierend auf 4 Quellen auf dem politischen Spektrum verordnet:</p>
-        <ul style='font-size:20px'>
-            <li><a href='https://interaktiv.tagesspiegel.de/lab/die-lieblingsmedien-der-parteien/' target='_blank'>Tagesspiegel</a></li>
-            <li><a href='https://uebermedien.de/93000/wieso-haben-zeitungen-eine-politische-ausrichtung/' target='_blank'>Übermedien</a></li>
-            <li><a href='https://www.pewresearch.org/global/fact-sheet/datenblatt-nachrichtenmedien-und-politische-haltungen-in-deutschland/' target='_blank'>Pew Research</a></li>
-            <li><a href='https://www.polkom.ifp.uni-mainz.de/files/2024/01/pm_perspektivenvielfalt.pdf' target='_blank'>Mainz Studie</a></li>
-        </ul>
+        <p style='font-size:30px'>Medien wurden basierend auf 4 Quellen auf dem politischen Spektrum verordnet:</p>
+        <p style='font-size:30px'>- <a href='https://interaktiv.tagesspiegel.de/lab/die-lieblingsmedien-der-parteien/' target='_blank' style='color:white;'>Tagesspiegel</a></p>
+        <p style='font-size:30px'>- <a href='https://uebermedien.de/93000/wieso-haben-zeitungen-eine-politische-ausrichtung/' target='_blank' style='color:white;'>Übermedien</a></p>
+        <p style='font-size:30px'>- <a href='https://www.pewresearch.org/global/fact-sheet/datenblatt-nachrichtenmedien-und-politische-haltungen-in-deutschland/' target='_blank' style='color:white;'>Pew Research</a></p>
+        <p style='font-size:30px'>- <a href='https://www.polkom.ifp.uni-mainz.de/files/2024/01/pm_perspektivenvielfalt.pdf' target='_blank' style='color:white;'>Mainz Studie</a></p>
     """, unsafe_allow_html=True)
+
+    # Divider for subsections
+    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
 
     # Subsection: Blinderfleck-Analyse
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Blinderfleck-Analyse</h3>", unsafe_allow_html=True)
+    st.subheader("Blinderfleck-Analyse")
     st.markdown("""
-        <p style='font-size:20px'>Definiert als politische Ausrichtungen mit ≤10% Anteil an der Berichterstattung zum ausgewählten Thema.</p>
+        <p style='font-size:30px'>Definiert als politische Ausrichtungen mit ≤10% Anteil an der Berichterstattung zum ausgewählten Thema.</p>
     """, unsafe_allow_html=True)
+
+    # Divider for subsections
+    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
 
     # Subsection: Stimmungs-Analyse
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Stimmungs-Analyse</h3>", unsafe_allow_html=True)
+    st.subheader("Stimmungs-Analyse")
     st.markdown("""
-        <p style='font-size:20px'>Modell: <a href='https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment' target='_blank'>XLM-RoBERTa-German-sentiment</a></p>
+        <p style='font-size:30px'>- <a href='https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment' target='_blank' style='color:white;'>XLM-RoBERTa-German-sentiment</a></p>
     """, unsafe_allow_html=True)
+
+    # Divider for subsections
+    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
 
     # Subsection: Verwandte Themen
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Verwandte Themen</h3>", unsafe_allow_html=True)
+    st.subheader("Verwandte Themen")
     st.markdown("""
-        <p style='font-size:20px'>Zeigt die 5 Themen mit den meisten (mind. 2) gemeinsamen Entitäten.</p>
+        <p style='font-size:30px'>Zeigt die 5 Themen mit den meisten (mind. 2) gemeinsamen Entitäten.</p>
     """, unsafe_allow_html=True)
 
-    # Divider
-    st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
+    # Final Divider
+    st.markdown("<hr style='border:2px solid #333'>", unsafe_allow_html=True)
+
 
     # Section: Datenbank
-    st.markdown("<h2 style='font-size:20px; color:#5b5b5c'>Datenbank</h2>", unsafe_allow_html=True)
+    st.header("Datenbank")
+    st.markdown("<hr style='border:2px solid #5b5b5c'>", unsafe_allow_html=True)  # Section divider
     st.markdown(f"""
-        <p style='font-size:20px; color:#f8f8fa'>
+        <p style='font-size:30px; color:#f8f8fa'>
         Unsere Datenbank umfasst <b>{df.shape[0]:,} Artikel</b> aus <b>{df['source'].nunique()} Medien</b>, die <b>{df['topic'].nunique()} Themen</b> abdecken.
         </p>
     """, unsafe_allow_html=True)
 
     # Visualization suggestions
     st.markdown("""
-        <p style='font-size:20px; color:#f8f8fa'>Hier sind einige Eckdaten visualisiert:</p>
+        <p style='font-size:30px; color:#f8f8fa'>Hier sind einige Eckdaten visualisiert:</p>
     """, unsafe_allow_html=True)
 
-    # Adjust plot fonts to size 20
+    # Adjust plot fonts to size 30
     def create_colored_bar_chart(x, y, title, xaxis_title, yaxis_title):
         fig = go.Figure(data=[go.Bar(
             x=x,
             y=y,
             marker=dict(color=y, colorscale='dense'))])
         fig.update_layout(
-            title=dict(text=title, font=dict(size=20)),
-            xaxis=dict(title=xaxis_title, titlefont=dict(size=20), tickfont=dict(size=17)),
-            yaxis=dict(title=yaxis_title, titlefont=dict(size=20), tickfont=dict(size=20)),
+            title=dict(text=title, font=dict(size=30)),
+            xaxis=dict(title=xaxis_title, titlefont=dict(size=30), tickfont=dict(size=30)),
+            yaxis=dict(title=yaxis_title, titlefont=dict(size=30), tickfont=dict(size=30)),
             paper_bgcolor="#0e1214",
             plot_bgcolor="#0e1214",
             font=dict(color="#f8f8fa"))
         return fig
 
     # Plot 1: Number of articles per political leaning
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Artikel nach politischer Ausrichtung</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:30px; color:#5b5b5c'>Artikel nach politischer Ausrichtung</h3>", unsafe_allow_html=True)
     pol_leaning_counts = df['pol_leaning'].value_counts()
     fig1 = create_colored_bar_chart(
         x=pol_leaning_counts.index,
         y=pol_leaning_counts.values,
         title="",
-        xaxis_title="Politische Ausrichtung",
+        xaxis_title="",
         yaxis_title="Anzahl der Artikel")
     st.plotly_chart(fig1, use_container_width=True)
 
     # Plot 2: Number of articles per news outlet
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Artikel nach Nachrichtenquelle</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:30px; color:#5b5b5c'>Artikel nach Nachrichtenquelle</h3>", unsafe_allow_html=True)
     source_counts = df['source'].value_counts()
     fig2 = create_colored_bar_chart(
         x=source_counts.index,
         y=source_counts.values,
         title="",
-        xaxis_title="Nachrichtenquelle",
+        xaxis_title="",
         yaxis_title="Anzahl der Artikel")
     st.plotly_chart(fig2, use_container_width=True)
 
     # Plot 3: Number of articles per topic
-    st.markdown("<h3 style='font-size:20px; color:#5b5b5c'>Artikel nach Thema</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:30px; color:#5b5b5c'>Artikel nach Thema</h3>", unsafe_allow_html=True)
     topic_counts = df['topic'].value_counts()
     fig3 = create_colored_bar_chart(
         x=topic_counts.index,
         y=topic_counts.values,
         title="",
-        xaxis_title="Themen",
+        xaxis_title="",
         yaxis_title="Anzahl der Artikel")
     st.plotly_chart(fig3, use_container_width=True)
