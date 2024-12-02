@@ -396,8 +396,6 @@ with tab1:
         # Display formatted articles
         st.markdown(formatted_articles, unsafe_allow_html=True)
 
-
-
         # Blind Spot Analysis
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
         pol_leaning_counts = pol_leaning_counts.reindex(pol_leaning_colors.keys(), fill_value=0)
