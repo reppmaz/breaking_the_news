@@ -19,7 +19,7 @@ def load_data(filepath):
 
 # load data
 
-data_filepath = "breaking_news_data_new.csv"
+data_filepath = "hackshow_dataframe_news_labeled.csv"
 
 df = load_data(data_filepath)
 
