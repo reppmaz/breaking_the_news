@@ -24,6 +24,7 @@ def load_data(filepath):
 data_filepath = "breaking_news_data_new.csv"
 
 df = load_data(data_filepath)
+df = df[df['topic'] != 'Börse']
 
 # --- Color Mappings ---
 pol_leaning_colors = {
