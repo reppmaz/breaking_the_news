@@ -18,10 +18,15 @@ def load_data(filepath):
     return df
 
 # load data
+'''
 data_filepath = "breaking_news_data_new.csv"
 file_id = "1WAs7wlV_KKk1abG23TZlr84_OGC9JeXb"
 csv_url = f"https://drive.google.com/uc?id={file_id}"
 df = load_data(csv_url)
+'''
+data_filepath = "breaking_news_data_new.csv"
+
+df = load_data(data_filepath)
 
 df = df[df['topic'] != 'Börse']
 
