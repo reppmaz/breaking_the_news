@@ -78,7 +78,7 @@ with tab1:
 
     # Topic selection
     st.markdown(
-    "<p style='font-size:20px; color:#5b5b5c;'><strong>Für die beste Darstellung schalten Sie bitte in den Wide-Modus:</strong><br> "
+    "<p style='font-size:20px; color:#5b5b5c;'><strong>Für die beste Darstellung schalte bitte in den Wide-Modus:</strong><br> "
     "Klicken Sie auf die drei Punkte oben rechts (⋮) → <em>Settings</em> → <em>Wide mode</em>.</p>",
     unsafe_allow_html=True)
     st.markdown("<p style='font-size:30px; color:#5b5b5c'><strong>Welches Nachrichtenthema sollen wir für dich analysieren?</strong></p>", unsafe_allow_html=True)
