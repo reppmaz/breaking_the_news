@@ -1,6 +1,6 @@
 # Breaking (The) News
 
-An interactive dashboard for exploring daily German news across various political perspectives. The platform analyzes top stories, media blind spots, sentiment, and interrelated topics to offer a comprehensive view of the day's news landscape.
+An [interactive dashboard](https://breakingthenews.streamlit.app/) for exploring daily German news across various political perspectives. The platform analyzes top stories, media blind spots, sentiment, and interrelated topics to offer a comprehensive view of the day's news landscape.
 
 ## Project Overview
 
