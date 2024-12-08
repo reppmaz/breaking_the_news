@@ -66,10 +66,6 @@ with tab1:
     filtered_topics = topic_counts[topic_counts >= 50].index.tolist()
     filtered_topics = sorted(filtered_topics)  # Sort topics alphabetically
 
-    # Initialize session state for topic selection
-    if "selected_main_topic" not in st.session_state:
-        st.session_state.selected_main_topic = filtered_topics[0] if filtered_topics else None  # Default to the first valid topic
-
     # Dropdown for topic selection
     st.subheader("Wähle ein Thema für die Analyse:")
 
@@ -78,17 +74,11 @@ with tab1:
         selected_main_topic = st.selectbox(
             "Thema auswählen:",
             options=filtered_topics,
-            index=filtered_topics.index(st.session_state.selected_main_topic)
-            if st.session_state.selected_main_topic in filtered_topics else 0
+            index=0  # Default to the first topic in the list
         )
 
-        # Update session state and force UI update if the main topic changes
-        if st.session_state.selected_main_topic != selected_main_topic:
-            st.session_state.selected_main_topic = selected_main_topic
-            st.experimental_rerun()  # Force UI to refresh immediately
-
         # Define final selected topic for analysis
-        selected_topic = st.session_state.selected_main_topic
+        selected_topic = selected_main_topic
 
         # Display selected topic for analysis
         st.write(f"**Analysiertes Thema:** {selected_topic}")
@@ -100,8 +90,6 @@ with tab1:
         st.write("Keine Themen mit mindestens 50 Artikeln verfügbar.")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
-
-
 
     # ----------------------------------------
     # SELECTED ARTICLES DISPLAY
