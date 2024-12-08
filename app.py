@@ -21,7 +21,8 @@ def load_data(filepath):
     df = df[df['datetime'].str[:6].apply(lambda x: x.isnumeric() and int(x) >= 202311 or x == 'nan')]
     return df
 
-data_filepath = "hackshow_dataframe_news_labeled.csv"
+#data_filepath = "hackshow_dataframe_news_labeled.csv"
+data_filepath = "breaking_news_data_new.csv"
 df = load_data(data_filepath)
 df = df[df['topic'] != 'Börse'] # drop boerse
 
@@ -51,49 +52,53 @@ with tab1:
 
     st.markdown(
     "<p style='font-size:20px; color:#5b5b5c;'><strong>Für die beste Darstellung schalte bitte in den Wide-Modus:</strong><br> "
-    "Klicken Sie auf die drei Punkte oben rechts (⋮) → <em>Settings</em> → <em>Wide mode</em>.</p>",
+    "Klicke auf die drei Punkte oben rechts (⋮) → <em>Settings</em> → <em>Wide mode</em>.</p>",
     unsafe_allow_html=True)
 
     # ----------------------------------
-    # TOPIC SELECTION AND RELATED TOPICS
-    # ----------------------------------
-    # ----------------------------------
     # TOPIC SELECTION
     # ----------------------------------
+    col1, col2 = st.columns(2)
+    with col1:
+        # filter topics to include only those with at least 50 articles
+        topic_counts = df['topic'].value_counts()
+        filtered_topics = topic_counts[topic_counts >= 50].nlargest(20).index.tolist()  # Select top 20 topics by count
+        filtered_topics = sorted(filtered_topics)  # Sort topics alphabetically
 
-    # Filter topics to include only those with at least 50 articles
-    topic_counts = df['topic'].value_counts()
-    filtered_topics = topic_counts[topic_counts >= 50].index.tolist()
-    filtered_topics = sorted(filtered_topics)  # Sort topics alphabetically
+        # dropdown for topic selection
+        st.subheader("Wähle ein Thema für die Analyse:")
 
-    # Dropdown for topic selection
-    st.subheader("Wähle ein Thema für die Analyse:")
-
-    # Only display topics with at least 50 articles
-    if filtered_topics:
+        # Create dropdown with HTML-styled topics
         selected_main_topic = st.selectbox(
-            "Thema auswählen:",
+            "",
             options=filtered_topics,
-            index=0  # Default to the first topic in the list
-        )
+            format_func=lambda x: f"{x}",  # Just return the topic name for rendering
+            key="topic_select")
 
-        # Define final selected topic for analysis
+        # Use HTML to style the dropdown
+        st.markdown(
+            """
+            <style>
+            div[data-testid="stSelectbox"] > div > div {
+                font-size: 18px;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True)
+
+        # define final selected topic for analysis
         selected_topic = selected_main_topic
 
-        # Display selected topic for analysis
-        st.write(f"**Analysiertes Thema:** {selected_topic}")
-        
         # Example: Analysis logic (filter articles by selected topic)
         analysis_df = df[df['topic'] == selected_topic]
-        st.write(f"Anzahl der Artikel für das Thema '{selected_topic}': {len(analysis_df)}")
-    else:
-        st.write("Keine Themen mit mindestens 50 Artikeln verfügbar.")
+    with col2:
+        st.subheader("")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
 
-    # ----------------------------------------
+    # -------------------------
     # SELECTED ARTICLES DISPLAY
-    # ----------------------------------------
+    # -------------------------
     col1, col2 = st.columns(2)
 
     # select articles for selected topic
@@ -107,49 +112,11 @@ with tab1:
             selected_articles.append(most_recent_article)
 
     with col1:
-        st.subheader(f"Das wird über {selected_topic} gesagt:")
-
-        # show selected articles
-        formatted_articles = ""
-        for article in selected_articles:
-            formatted_articles += f"""
-                <p style='font-size:20px'>- <a href='{article["url"]}' target='_blank' style='color:white;'>{article["source"]}</a> (eher {article["pol_leaning"]})</p>
-            """
-
-        # sisplay formatted articles
-        st.markdown(formatted_articles, unsafe_allow_html=True)
-
-        # percentage of articles by political leaning
-        pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
-        pol_leaning_counts = pol_leaning_counts.reindex(pol_leaning_colors.keys(), fill_value=0)  # Ensure all leanings are included
-        total_articles = pol_leaning_counts.sum()
-        pol_leaning_percentages = (pol_leaning_counts / total_articles * 100).round(2)
-
-        # blind spots (pol_leaning <= 10%)
-        blind_spots = pol_leaning_percentages[pol_leaning_percentages <= 10]
-        if not blind_spots.empty:
-            st.markdown("<br>", unsafe_allow_html=True)  # Empty line
-            st.markdown("### Blinder Fleck")
-            st.markdown("""<p style="font-size:20px;">Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>""", unsafe_allow_html=True)
-
-            formatted_blind_spots = ""
-            for leaning, pct in blind_spots.items():
-                if pct == 0.0:
-                    formatted_blind_spots += f"""
-                        <p style="font-size:20px; line-height:1.5;">- <b>{leaning}</b> mit gar keiner Berichterstattung</p>
-                    """
-                else:
-                    formatted_blind_spots += f"""
-                        <p style="font-size:20px; line-height:1.5;">- <b>{leaning}</b> mit nur <b>{pct}%</b> der Berichterstattung</p>
-                    """
-            st.markdown(formatted_blind_spots, unsafe_allow_html=True)
-
-    with col2:
         st.subheader(f"Wer berichtet wie viel über {selected_topic}:")
 
         # filter out 0 values
         pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
-        pol_leaning_counts = pol_leaning_counts[pol_leaning_counts > 0]  # Exclude 0 values
+        pol_leaning_counts = pol_leaning_counts[pol_leaning_counts > 0]
         labels, values = pol_leaning_counts.index, pol_leaning_counts.values
         colors = [pol_leaning_colors[leaning] for leaning in labels]
 
@@ -169,14 +136,39 @@ with tab1:
                 orientation="v",
                 yanchor="top",
                 y=1,
-                xanchor="right",
-                x=1.2,
+                xanchor="left",  # Align to the left
+                x=-0.2,  # Adjust position to place it on the left of the chart
                 font=dict(size=19)),
             margin=dict(t=40, b=40, l=40, r=40),
             paper_bgcolor="#0e1214",
             font=dict(color="#f8f8fa"))
-
         st.plotly_chart(fig, use_container_width=True)
+        
+        # percentage of articles by political leaning
+        pol_leaning_counts = df[df['topic'] == selected_topic]['pol_leaning'].value_counts()
+        pol_leaning_counts = pol_leaning_counts.reindex(pol_leaning_colors.keys(), fill_value=0)  # Ensure all leanings are included
+        total_articles = pol_leaning_counts.sum()
+        pol_leaning_percentages = (pol_leaning_counts / total_articles * 100).round(2)
+
+    with col2:
+        # blind spots (pol_leaning <= 10%)
+        blind_spots = pol_leaning_percentages[pol_leaning_percentages <= 10]
+        if not blind_spots.empty:
+            st.markdown("<br>", unsafe_allow_html=True)  # Empty line
+            st.markdown("### Blinder Fleck")
+            st.markdown("""<p style="font-size:20px;">Die folgenden politischen Seiten sprechen wenig über dieses Thema:</p>""", unsafe_allow_html=True)
+
+            formatted_blind_spots = ""
+            for leaning, pct in blind_spots.items():
+                if pct == 0.0:
+                    formatted_blind_spots += f"""
+                        <p style="font-size:20px; line-height:1.5;">- <b>{leaning}</b> mit gar keiner Berichterstattung</p>
+                    """
+                else:
+                    formatted_blind_spots += f"""
+                        <p style="font-size:20px; line-height:1.5;">- <b>{leaning}</b> mit nur <b>{pct}%</b> der Berichterstattung</p>
+                    """
+            st.markdown(formatted_blind_spots, unsafe_allow_html=True)
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
@@ -323,9 +315,9 @@ with tab1:
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)
 
-    # -------------------------
+    # ----------------------------
     # SENTIMENT ANALYSIS OVER TIME
-    # -------------------------
+    # ----------------------------
     st.subheader(f"So verändert sich die Stimmung zu {selected_topic} über die Zeit?")
 
     # filter out rows with NaN, invalid 'datetime' values, or years before 2023
