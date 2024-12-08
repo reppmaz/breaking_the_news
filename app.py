@@ -65,6 +65,7 @@ with tab1:
     topic_counts = df['topic'].value_counts()
     valid_topics = topic_counts[topic_counts >= 50].index.tolist()
     filtered_topics = sorted(valid_topics)  # Sort topics alphabetically
+    st.write("Filtered Topics (≥50 articles):", filtered_topics)
 
     # Initialize session state for topic selection
     if "selected_main_topic" not in st.session_state:
