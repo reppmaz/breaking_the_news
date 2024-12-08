@@ -77,6 +77,8 @@ with tab1:
         st.session_state.selected_main_topic = top_topic
     if "selected_related_topic" not in st.session_state:
         st.session_state.selected_related_topic = None
+    if "final_selected_topic" not in st.session_state:
+        st.session_state.final_selected_topic = top_topic
 
     col1, col2 = st.columns(2)
     style = """
@@ -95,10 +97,11 @@ with tab1:
             index=sorted(df['topic'].unique()).index(st.session_state.selected_main_topic)
             if st.session_state.selected_main_topic in sorted(df['topic'].unique()) else 0
         )
-        # Update session state only if the main topic is changed
+        # Update session state if the main topic changes
         if st.session_state.selected_main_topic != selected_main_topic:
             st.session_state.selected_main_topic = selected_main_topic
             st.session_state.selected_related_topic = None  # Reset related topic on main topic change
+            st.session_state.final_selected_topic = selected_main_topic  # Update final topic for analysis
 
     # Dropdown for related topics
     with col2:
@@ -123,20 +126,22 @@ with tab1:
                 index=related_topics.index(st.session_state.selected_related_topic)
                 if st.session_state.selected_related_topic in related_topics else 0
             )
-            # Update session state for related topic
+            # Update session state if the related topic changes
             if st.session_state.selected_related_topic != selected_related_topic:
                 st.session_state.selected_related_topic = selected_related_topic
+                st.session_state.final_selected_topic = selected_related_topic  # Update final topic for analysis
         else:
             st.write("Keine verwandten Themen verfügbar.")
             st.session_state.selected_related_topic = None
 
     # Define final selected topic for analysis
-    if st.session_state.selected_related_topic:
-        selected_topic = st.session_state.selected_related_topic
-    else:
-        selected_topic = st.session_state.selected_main_topic
+    selected_topic = st.session_state.final_selected_topic
+
+    # Display selected topic for analysis
+    st.write(f"**Analysiertes Thema:** {selected_topic}")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
+
 
 
     # ----------------------------------------
