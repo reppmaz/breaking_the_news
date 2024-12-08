@@ -61,28 +61,27 @@ with tab1:
     # TOPIC SELECTION
     # ----------------------------------
 
-    # Get 300 most recent articles and calculate the most frequent topic
-    df_recent = df.dropna(subset=['datetime']).sort_values(by='datetime', ascending=False).head(300)
-    top_topic = df_recent['topic'].value_counts().idxmax()
-
     # Get all unique topics from the dataset
     all_topics = sorted(df['topic'].unique())
 
     # Initialize session state for topic selection
     if "selected_main_topic" not in st.session_state:
-        st.session_state.selected_main_topic = top_topic
+        st.session_state.selected_main_topic = all_topics[0]  # Default to the first topic
 
     col1, col2 = st.columns(2)
 
     # Dropdown for topic selection
     with col1:
         st.subheader("Wähle ein Thema für die Analyse:")
+        
+        # Ensure index calculation matches displayed topics
         selected_main_topic = st.selectbox(
             "",
             options=all_topics,
             index=all_topics.index(st.session_state.selected_main_topic)
             if st.session_state.selected_main_topic in all_topics else 0
         )
+        
         # Update session state if the main topic changes
         if st.session_state.selected_main_topic != selected_main_topic:
             st.session_state.selected_main_topic = selected_main_topic
