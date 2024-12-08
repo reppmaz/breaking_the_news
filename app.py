@@ -61,12 +61,14 @@ with tab1:
     # TOPIC SELECTION
     # ----------------------------------
 
-    # Get all unique topics from the dataset
-    all_topics = sorted(df['topic'].unique())
+    # Filter topics to include only those with at least 50 articles
+    topic_counts = df['topic'].value_counts()
+    valid_topics = topic_counts[topic_counts >= 50].index.tolist()
+    filtered_topics = sorted(valid_topics)  # Sort topics alphabetically
 
     # Initialize session state for topic selection
     if "selected_main_topic" not in st.session_state:
-        st.session_state.selected_main_topic = all_topics[0]  # Default to the first topic
+        st.session_state.selected_main_topic = filtered_topics[0] if filtered_topics else None  # Default to the first valid topic
 
     col1, col2 = st.columns(2)
 
@@ -74,17 +76,20 @@ with tab1:
     with col1:
         st.subheader("Wähle ein Thema für die Analyse:")
         
-        # Ensure index calculation matches displayed topics
-        selected_main_topic = st.selectbox(
-            "",
-            options=all_topics,
-            index=all_topics.index(st.session_state.selected_main_topic)
-            if st.session_state.selected_main_topic in all_topics else 0
-        )
-        
-        # Update session state if the main topic changes
-        if st.session_state.selected_main_topic != selected_main_topic:
-            st.session_state.selected_main_topic = selected_main_topic
+        # Only display topics with at least 50 articles
+        if filtered_topics:
+            selected_main_topic = st.selectbox(
+                "",
+                options=filtered_topics,
+                index=filtered_topics.index(st.session_state.selected_main_topic)
+                if st.session_state.selected_main_topic in filtered_topics else 0
+            )
+            
+            # Update session state if the main topic changes
+            if st.session_state.selected_main_topic != selected_main_topic:
+                st.session_state.selected_main_topic = selected_main_topic
+        else:
+            st.write("Keine Themen mit mindestens 50 Artikeln verfügbar.")
 
     # Column 2 remains empty for now
     with col2:
@@ -95,7 +100,10 @@ with tab1:
     selected_topic = st.session_state.selected_main_topic
 
     # Display selected topic for analysis
-    st.write(f"**Analysiertes Thema:** {selected_topic}")
+    if selected_topic:
+        st.write(f"**Analysiertes Thema:** {selected_topic}")
+    else:
+        st.write("Kein Thema ausgewählt.")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
 
