@@ -440,13 +440,13 @@ with tab1:
     # -----------------------------------------------
     st.subheader(f"Stimmungs-Scores im Zeitverlauf, gruppiert nach politischer Ausrichtung für {selected_topic}")
 
-    # filter out rows with NaN, invalid 'datetime' values, or years before 2023
+    # Filter out rows with NaN, invalid 'datetime' values, or years before 2023
     df_filtered = df.dropna(subset=['datetime'])
     df_filtered = df_filtered[df_filtered['datetime'].str.match(r'^\d{8,}')]
     df_filtered['Datum'] = df_filtered['datetime'].str[:6]
     df_filtered['Datum'] = pd.to_datetime(df_filtered['Datum'], format='%Y%m')
 
-    # filter for 'links', 'mitte', and 'rechts'
+    # Filter for 'links', 'mitte', and 'rechts'
     selected_political_leanings = ['links', 'mitte', 'rechts']
     pol_leaning_colors = {
         'links': '#fe292b',
@@ -467,21 +467,21 @@ with tab1:
             format="MM/YYYY",
             key="scatter_date_slider")
 
-        # filter data based on the selected date range
+        # Filter data based on the selected date range
         start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
         df_filtered = df_filtered[(df_filtered['Datum'] >= start_date) & (df_filtered['Datum'] <= end_date)]
 
-        # map sentiment categories to numerical scores
+        # Map sentiment categories to numerical scores
         sentiment_mapping = {
             "positive": 1,
             "neutral": 0,
             "negative": -1}
         df_filtered['sentiment_score'] = df_filtered['sentiment'].map(sentiment_mapping)
 
-        # filter for specific political leanings
+        # Filter for specific political leanings
         df_filtered = df_filtered[df_filtered['pol_leaning'].isin(selected_political_leanings)]
 
-        # group by Datum and pol_leaning
+        # Group by Datum and pol_leaning
         sentiment_trends = (
             df_filtered[df_filtered['topic'] == selected_topic]
             .groupby(['Datum', 'pol_leaning'])
@@ -496,37 +496,59 @@ with tab1:
                 "-1 = negativ, 0 = neutral, 1 = positiv</p>",
                 unsafe_allow_html=True)
 
-            # Create scatter plot with trendline
-            fig = px.scatter(
-                sentiment_trends,
-                x="Datum",
-                y="sentiment_score",
-                color="pol_leaning",
-                color_discrete_map=pol_leaning_colors,  # Use the updated color scheme
-                trendline="ols",  # regression line
-                title=f"",
-                labels={
-                    "sentiment_score": "Durchschnittlicher Stimmungs-Score",
-                    "pol_leaning": "Politische Ausrichtung"})
+            # Prepare a plotly scatter plot
+            fig = go.Figure()
 
-            fig.update_xaxes(
-                title=dict(text="Datum", font=dict(size=20)),
-                tickfont=dict(size=20),
-                tickformat="%b %Y",
-                dtick="M1")
-            fig.update_yaxes(
-                title=dict(
-                    text="Durchschnittlicher Stimmungs-Score",
-                    font=dict(size=20)),
-                tickfont=dict(size=20),
-                range=[-1.2, 1.2])
+            # Add scatter points and regression line for each political leaning
+            for pol_leaning in selected_political_leanings:
+                filtered = sentiment_trends[sentiment_trends['pol_leaning'] == pol_leaning]
+                
+                if not filtered.empty:
+                    # Add scatter points
+                    fig.add_trace(go.Scatter(
+                        x=filtered['Datum'],
+                        y=filtered['sentiment_score'],
+                        mode='markers',
+                        name=pol_leaning,
+                        marker=dict(color=pol_leaning_colors[pol_leaning])
+                    ))
+
+                    # Calculate regression line
+                    x_numeric = (filtered['Datum'] - filtered['Datum'].min()).dt.days
+                    coefficients = np.polyfit(x_numeric, filtered['sentiment_score'], 1)  # Linear fit
+                    regression_line = coefficients[0] * x_numeric + coefficients[1]
+
+                    # Add regression line
+                    fig.add_trace(go.Scatter(
+                        x=filtered['Datum'],
+                        y=regression_line,
+                        mode='lines',
+                        name=f"{pol_leaning} (Trend)",
+                        line=dict(color=pol_leaning_colors[pol_leaning], dash='dash')
+                    ))
+
+            # Update layout
             fig.update_layout(
+                title="",
+                xaxis=dict(
+                    title="Datum",
+                    titlefont=dict(size=20),
+                    tickfont=dict(size=20),
+                    tickformat="%b %Y"),
+                yaxis=dict(
+                    title="Durchschnittlicher Stimmungs-Score",
+                    titlefont=dict(size=20),
+                    tickfont=dict(size=20),
+                    range=[-1.2, 1.2]),
                 legend=dict(title=dict(text="Politische Ausrichtung", font=dict(size=20)), font=dict(size=20)),
                 paper_bgcolor="#0e1214",
                 plot_bgcolor="#0e1214",
-                font=dict(color="#f8f8fa"))
+                font=dict(color="#f8f8fa")
+            )
 
+            # Display the plot
             st.plotly_chart(fig, use_container_width=True)
+
 
 with tab2:
     # --------------
