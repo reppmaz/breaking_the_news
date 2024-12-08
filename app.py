@@ -65,12 +65,8 @@ with tab1:
     df_recent = df.dropna(subset=['datetime']).sort_values(by='datetime', ascending=False).head(300)
     top_topic = df_recent['topic'].value_counts().idxmax()
 
-    # Get the top 10 topics overall
+    # Get the top 10 topics overall (for possible future use, not restricting dropdown)
     top_10_topics = df['topic'].value_counts().nlargest(10).index.tolist()
-
-    # Handle cases where top_topic is not in top_10_topics
-    if top_topic not in top_10_topics:
-        top_10_topics.insert(0, top_topic)
 
     # Initialize session state for topics
     if "selected_main_topic" not in st.session_state:
@@ -81,21 +77,16 @@ with tab1:
         st.session_state.final_selected_topic = top_topic
 
     col1, col2 = st.columns(2)
-    style = """
-    <style>
-        .stSelectbox > div {font-size: 18px;}
-    </style>
-    """
-    st.markdown(style, unsafe_allow_html=True)
 
     # Dropdown for main topic
     with col1:
         st.subheader("Wähle ein Thema für die Analyse:")
+        available_topics = sorted(df['topic'].unique())  # All unique topics in the dataset
         selected_main_topic = st.selectbox(
             "",
-            options=sorted(df['topic'].unique()),  # Sorted list of all topics
-            index=sorted(df['topic'].unique()).index(st.session_state.selected_main_topic)
-            if st.session_state.selected_main_topic in sorted(df['topic'].unique()) else 0
+            options=available_topics,
+            index=available_topics.index(st.session_state.selected_main_topic)
+            if st.session_state.selected_main_topic in available_topics else 0
         )
         # Update session state if the main topic changes
         if st.session_state.selected_main_topic != selected_main_topic:
@@ -126,7 +117,7 @@ with tab1:
                 index=related_topics.index(st.session_state.selected_related_topic)
                 if st.session_state.selected_related_topic in related_topics else 0
             )
-            # Update session state if the related topic changes
+            # Update session state for related topic
             if st.session_state.selected_related_topic != selected_related_topic:
                 st.session_state.selected_related_topic = selected_related_topic
                 st.session_state.final_selected_topic = selected_related_topic  # Update final topic for analysis
@@ -141,6 +132,7 @@ with tab1:
     st.write(f"**Analysiertes Thema:** {selected_topic}")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
+
 
 
 
