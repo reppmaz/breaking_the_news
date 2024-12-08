@@ -82,9 +82,10 @@ with tab1:
             if st.session_state.selected_main_topic in filtered_topics else 0
         )
 
-        # Update session state if the main topic changes
+        # Update session state and force UI update if the main topic changes
         if st.session_state.selected_main_topic != selected_main_topic:
             st.session_state.selected_main_topic = selected_main_topic
+            st.experimental_rerun()  # Force UI to refresh immediately
 
         # Define final selected topic for analysis
         selected_topic = st.session_state.selected_main_topic
@@ -99,6 +100,7 @@ with tab1:
         st.write("Keine Themen mit mindestens 50 Artikeln verfügbar.")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
+
 
 
     # ----------------------------------------
