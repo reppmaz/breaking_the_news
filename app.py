@@ -57,16 +57,26 @@ with tab1:
     # ----------------------------------
     # TOPIC SELECTION AND RELATED TOPICS
     # ----------------------------------
-    # get 300 most recent articles and calculate the most frequent topic
+    # ----------------------------------
+    # TOPIC SELECTION AND RELATED TOPICS
+    # ----------------------------------
+
+    # Get 300 most recent articles and calculate the most frequent topic
     df_recent = df.dropna(subset=['datetime']).sort_values(by='datetime', ascending=False).head(300)
     top_topic = df_recent['topic'].value_counts().idxmax()
 
-    # get the top 10 topics overall
+    # Get the top 10 topics overall
     top_10_topics = df['topic'].value_counts().nlargest(10).index.tolist()
 
-    # handle cases where top_topic is not in top_10_topics
+    # Handle cases where top_topic is not in top_10_topics
     if top_topic not in top_10_topics:
         top_10_topics.insert(0, top_topic)
+
+    # Initialize session state for topics
+    if "selected_main_topic" not in st.session_state:
+        st.session_state.selected_main_topic = top_topic
+    if "selected_related_topic" not in st.session_state:
+        st.session_state.selected_related_topic = None
 
     col1, col2 = st.columns(2)
     style = """
@@ -76,58 +86,58 @@ with tab1:
     """
     st.markdown(style, unsafe_allow_html=True)
 
-    # initialize session state for selected topic
-    if "selected_topic" not in st.session_state:
-        st.session_state.selected_topic = top_topic
-
-    # dropdown for main topic
+    # Dropdown for main topic
     with col1:
-        st.subheader(f"Wähle ein Thema für die Analyse:")
-
+        st.subheader("Wähle ein Thema für die Analyse:")
         selected_main_topic = st.selectbox(
             "",
             options=sorted(df['topic'].unique()),  # Sorted list of all topics
-            index=sorted(df['topic'].unique()).index(st.session_state.selected_topic)
-            if st.session_state.selected_topic in sorted(df['topic'].unique()) else 0)
-        # update session state if new main topic is selected
-        if st.session_state.selected_topic != selected_main_topic:
-            st.session_state.selected_topic = selected_main_topic
+            index=sorted(df['topic'].unique()).index(st.session_state.selected_main_topic)
+            if st.session_state.selected_main_topic in sorted(df['topic'].unique()) else 0
+        )
+        # Update session state only if the main topic is changed
+        if st.session_state.selected_main_topic != selected_main_topic:
+            st.session_state.selected_main_topic = selected_main_topic
+            st.session_state.selected_related_topic = None  # Reset related topic on main topic change
 
-    # dropdown for related topics
+    # Dropdown for related topics
     with col2:
-        st.subheader(f"Verwandte Themen:")
-
-        # find related topics based on shared entities
+        st.subheader("Verwandte Themen:")
+        related_topics = []
         if 'related_topics' in df.columns:
-            related_topics = df.loc[df['topic'] == st.session_state.selected_topic, 'related_topics'].dropna().values
-            if len(related_topics) > 0:
+            related_data = df.loc[df['topic'] == st.session_state.selected_main_topic, 'related_topics'].dropna()
+            if not related_data.empty:
+                # Flatten and process related topics
                 related_topics = [
-                    topic[0] if isinstance(topic, tuple) else topic  # extract topic name
-                    for sublist in related_topics
+                    topic[0] if isinstance(topic, tuple) else topic  # Extract topic name
+                    for sublist in related_data
                     for topic in eval(sublist)
-                    if topic != st.session_state.selected_topic]
-                #get unique related topics
+                    if topic != st.session_state.selected_main_topic
+                ]
                 related_topics = list(pd.Series(related_topics).value_counts().head(5).index)
-            else:
-                related_topics = []
-        else:
-            related_topics = []
 
-        if len(related_topics) > 0:
+        if related_topics:
             selected_related_topic = st.selectbox(
                 "",
                 options=related_topics,
-                index=0,)
-            # ppdate session state if new related topic is selected
-            if st.session_state.selected_topic != selected_related_topic:
-                st.session_state.selected_topic = selected_related_topic
+                index=related_topics.index(st.session_state.selected_related_topic)
+                if st.session_state.selected_related_topic in related_topics else 0
+            )
+            # Update session state for related topic
+            if st.session_state.selected_related_topic != selected_related_topic:
+                st.session_state.selected_related_topic = selected_related_topic
         else:
             st.write("Keine verwandten Themen verfügbar.")
+            st.session_state.selected_related_topic = None
 
-    # Define selected topic
-    selected_topic = st.session_state.selected_topic
+    # Define final selected topic for analysis
+    if st.session_state.selected_related_topic:
+        selected_topic = st.session_state.selected_related_topic
+    else:
+        selected_topic = st.session_state.selected_main_topic
 
-    st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True) # boarder
+    st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
+
 
     # ----------------------------------------
     # SELECTED ARTICLES DISPLAY
