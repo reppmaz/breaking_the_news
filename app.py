@@ -58,83 +58,47 @@ with tab1:
     # TOPIC SELECTION AND RELATED TOPICS
     # ----------------------------------
     # ----------------------------------
-    # TOPIC SELECTION AND RELATED TOPICS
+    # TOPIC SELECTION
     # ----------------------------------
 
     # Get 300 most recent articles and calculate the most frequent topic
     df_recent = df.dropna(subset=['datetime']).sort_values(by='datetime', ascending=False).head(300)
     top_topic = df_recent['topic'].value_counts().idxmax()
 
-    # Get the top 10 topics overall (for possible future use, not restricting dropdown)
-    top_10_topics = df['topic'].value_counts().nlargest(10).index.tolist()
+    # Get all unique topics from the dataset
+    all_topics = sorted(df['topic'].unique())
 
-    # Initialize session state for topics
+    # Initialize session state for topic selection
     if "selected_main_topic" not in st.session_state:
         st.session_state.selected_main_topic = top_topic
-    if "selected_related_topic" not in st.session_state:
-        st.session_state.selected_related_topic = None
-    if "final_selected_topic" not in st.session_state:
-        st.session_state.final_selected_topic = top_topic
 
     col1, col2 = st.columns(2)
 
-    # Dropdown for main topic
+    # Dropdown for topic selection
     with col1:
         st.subheader("Wähle ein Thema für die Analyse:")
-        available_topics = sorted(df['topic'].unique())  # All unique topics in the dataset
         selected_main_topic = st.selectbox(
             "",
-            options=available_topics,
-            index=available_topics.index(st.session_state.selected_main_topic)
-            if st.session_state.selected_main_topic in available_topics else 0
+            options=all_topics,
+            index=all_topics.index(st.session_state.selected_main_topic)
+            if st.session_state.selected_main_topic in all_topics else 0
         )
         # Update session state if the main topic changes
         if st.session_state.selected_main_topic != selected_main_topic:
             st.session_state.selected_main_topic = selected_main_topic
-            st.session_state.selected_related_topic = None  # Reset related topic on main topic change
-            st.session_state.final_selected_topic = selected_main_topic  # Update final topic for analysis
 
-    # Dropdown for related topics
+    # Column 2 remains empty for now
     with col2:
         st.subheader("Verwandte Themen:")
-        related_topics = []
-        if 'related_topics' in df.columns:
-            related_data = df.loc[df['topic'] == st.session_state.selected_main_topic, 'related_topics'].dropna()
-            if not related_data.empty:
-                # Flatten and process related topics
-                related_topics = [
-                    topic[0] if isinstance(topic, tuple) else topic  # Extract topic name
-                    for sublist in related_data
-                    for topic in eval(sublist)
-                    if topic != st.session_state.selected_main_topic
-                ]
-                related_topics = list(pd.Series(related_topics).value_counts().head(5).index)
-
-        if related_topics:
-            selected_related_topic = st.selectbox(
-                "",
-                options=related_topics,
-                index=related_topics.index(st.session_state.selected_related_topic)
-                if st.session_state.selected_related_topic in related_topics else 0
-            )
-            # Update session state for related topic
-            if st.session_state.selected_related_topic != selected_related_topic:
-                st.session_state.selected_related_topic = selected_related_topic
-                st.session_state.final_selected_topic = selected_related_topic  # Update final topic for analysis
-        else:
-            st.write("Keine verwandten Themen verfügbar.")
-            st.session_state.selected_related_topic = None
+        st.write("Diese Spalte ist derzeit leer.")  # Placeholder text
 
     # Define final selected topic for analysis
-    selected_topic = st.session_state.final_selected_topic
+    selected_topic = st.session_state.selected_main_topic
 
     # Display selected topic for analysis
     st.write(f"**Analysiertes Thema:** {selected_topic}")
 
     st.markdown("<hr style='border:1px solid #333'>", unsafe_allow_html=True)  # Border
-
-
-
 
     # ----------------------------------------
     # SELECTED ARTICLES DISPLAY
