@@ -85,7 +85,7 @@ with tab1:
         st.subheader(f"Wähle ein Thema für die Analyse:")
 
         selected_main_topic = st.selectbox(
-            "Hauptthema",
+            "",
             options=sorted(df['topic'].unique()),  # Sorted list of all topics
             index=sorted(df['topic'].unique()).index(st.session_state.selected_topic)
             if st.session_state.selected_topic in sorted(df['topic'].unique()) else 0)
@@ -115,7 +115,7 @@ with tab1:
 
         if len(related_topics) > 0:
             selected_related_topic = st.selectbox(
-                "Verwandtes Thema",
+                "",
                 options=related_topics,
                 index=0,)
             # ppdate session state if new related topic is selected
@@ -497,38 +497,32 @@ with tab1:
                 "-1 = negativ, 0 = neutral, 1 = positiv</p>",
                 unsafe_allow_html=True)
 
-            # Prepare a plotly scatter plot
             fig = go.Figure()
-
-            # Add scatter points and regression line for each political leaning
             for pol_leaning in selected_political_leanings:
                 filtered = sentiment_trends[sentiment_trends['pol_leaning'] == pol_leaning]
                 
                 if not filtered.empty:
-                    # Add scatter points
+                    # add scatter points
                     fig.add_trace(go.Scatter(
                         x=filtered['Datum'],
                         y=filtered['sentiment_score'],
                         mode='markers',
                         name=pol_leaning,
-                        marker=dict(color=pol_leaning_colors[pol_leaning])
-                    ))
+                        marker=dict(color=pol_leaning_colors[pol_leaning])))
 
-                    # Calculate regression line
+                    # calculate regression line
                     x_numeric = (filtered['Datum'] - filtered['Datum'].min()).dt.days
                     coefficients = np.polyfit(x_numeric, filtered['sentiment_score'], 1)  # Linear fit
                     regression_line = coefficients[0] * x_numeric + coefficients[1]
 
-                    # Add regression line
+                    # add regression line
                     fig.add_trace(go.Scatter(
                         x=filtered['Datum'],
                         y=regression_line,
                         mode='lines',
                         name=f"{pol_leaning} (Trend)",
-                        line=dict(color=pol_leaning_colors[pol_leaning], dash='dash')
-                    ))
+                        line=dict(color=pol_leaning_colors[pol_leaning])))
 
-            # Update layout
             fig.update_layout(
                 title="",
                 xaxis=dict(
@@ -544,12 +538,9 @@ with tab1:
                 legend=dict(title=dict(text="Politische Ausrichtung", font=dict(size=20)), font=dict(size=20)),
                 paper_bgcolor="#0e1214",
                 plot_bgcolor="#0e1214",
-                font=dict(color="#f8f8fa")
-            )
+                font=dict(color="#f8f8fa"))
 
-            # Display the plot
             st.plotly_chart(fig, use_container_width=True)
-
 
 with tab2:
     # --------------
