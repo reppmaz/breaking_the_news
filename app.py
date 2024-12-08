@@ -65,15 +65,14 @@ with tab1:
     topic_counts = df['topic'].value_counts()
     valid_topics = topic_counts[topic_counts >= 50].index.tolist()
     filtered_topics = sorted(valid_topics)  # Sort topics alphabetically
-    st.write("Filtered Topics (≥50 articles):", filtered_topics)
 
     # Initialize session state for topic selection
     if "selected_main_topic" not in st.session_state:
         st.session_state.selected_main_topic = filtered_topics[0] if filtered_topics else None  # Default to the first valid topic
 
+    # Dropdown for topic selection
     col1, col2 = st.columns(2)
 
-    # Dropdown for topic selection
     with col1:
         st.subheader("Wähle ein Thema für die Analyse:")
         
@@ -92,17 +91,19 @@ with tab1:
         else:
             st.write("Keine Themen mit mindestens 50 Artikeln verfügbar.")
 
-    # Column 2 remains empty for now
-    with col2:
-        st.subheader("Verwandte Themen:")
-        st.write("Diese Spalte ist derzeit leer.")  # Placeholder text
-
     # Define final selected topic for analysis
     selected_topic = st.session_state.selected_main_topic
 
     # Display selected topic for analysis
     if selected_topic:
         st.write(f"**Analysiertes Thema:** {selected_topic}")
+        
+        # Add a placeholder for your analysis logic
+        # Filter the DataFrame to only include articles for the selected topic
+        analysis_df = df[df['topic'] == selected_topic]
+        
+        # Example: Display the number of articles for the selected topic
+        st.write(f"Anzahl der Artikel für das Thema '{selected_topic}': {len(analysis_df)}")
     else:
         st.write("Kein Thema ausgewählt.")
 
