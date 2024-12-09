@@ -44,7 +44,7 @@ logging.basicConfig(
 nltk.download('stopwords')
 logging.info("-----------> all libs imported")
 
-'''
+
 #--------------------------
 # scraping new article data
 #--------------------------
@@ -157,12 +157,11 @@ def update_and_upload_to_gdrive():
 # Run the process to update and upload data to Google Drive
 update_and_upload_to_gdrive()
 
-'''
 #--------------------------------------
 # cleaning freshly scraped article data
 #--------------------------------------
-#df = combined_df
-df = pd.read_csv('/Users/reppmazc/Downloads/news_data.csv')
+df = combined_df
+#df = pd.read_csv('/Users/reppmazc/Downloads/news_data.csv')
 
 # renaming
 #---------
@@ -464,7 +463,6 @@ df['sentiment'] = sentiment_results
 
 logging.info("-----------> sentiment analysis done")
 
-'''
 #---------------------
 # Topic Classification
 #---------------------
@@ -492,8 +490,7 @@ topic_model = BERTopic(
     vectorizer_model=vectorizer_model,
     min_topic_size=10,
     n_gram_range=(1, 2),
-    calculate_probabilities=True
-)
+    calculate_probabilities=True)
 
 # Fit the BERTopic model on the entire dataset in one go
 topics, probabilities = topic_model.fit_transform(df['processed_content'])
@@ -553,7 +550,6 @@ topic_info['assigned_label'] = assigned_labels
 df = df.merge(topic_info[['Topic', 'assigned_label']], left_on='topic', right_on='Topic').drop(columns=['Topic'])
 logging.info('-----------> improved labelling done')
 
-'''
 #------------------------------
 # getting and counting entities
 #------------------------------
@@ -630,5 +626,5 @@ logging.info('-----------> related topics done')
 #---------------------------
 # merge with historical data
 #---------------------------
-df.to_csv('test_2.csv')
+df.to_csv('whats_news_data.csv')
 logging.info('-----------> doneeeeee')

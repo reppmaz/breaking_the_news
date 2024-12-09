@@ -580,15 +580,6 @@ with tab2:
         <p style='font-size:20px'>- <a href='https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment' target='_blank' style='color:white;'>XLM-RoBERTa-German-sentiment</a></p>
     """, unsafe_allow_html=True)
 
-    # Divider for subsections
-    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
-
-    # Subsection: Verwandte Themen
-    st.subheader("Verwandte Themen")
-    st.markdown("""
-        <p style='font-size:20px'>Zeigt die 5 Themen mit den meisten (mind. 2) gemeinsamen Entitäten.</p>
-    """, unsafe_allow_html=True)
-
     # Final Divider
     st.markdown("<hr style='border:2px solid #333'>", unsafe_allow_html=True)
 
