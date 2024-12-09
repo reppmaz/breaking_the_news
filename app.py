@@ -534,6 +534,14 @@ with tab2:
         <p style='font-size:20px'>Modell: <a href='https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2' target='_blank' style='color:white;'>paraphrase-MiniLM-L6-v2</a></p>
     """, unsafe_allow_html=True)
 
+    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
+
+    # Subsection: Stimmungs-Analyse
+    st.subheader("Stimmungs-Analyse")
+    st.markdown("""
+        <p style='font-size:20px'>- <a href='https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment' target='_blank' style='color:white;'>XLM-RoBERTa-German-sentiment</a></p>
+    """, unsafe_allow_html=True)
+
     # Divider for subsections
     st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
 
@@ -569,15 +577,6 @@ with tab2:
     st.subheader("Blinderfleck-Analyse")
     st.markdown("""
         <p style='font-size:20px'>Definiert als politische Ausrichtungen mit ≤10% Anteil an der Berichterstattung zum ausgewählten Thema.</p>
-    """, unsafe_allow_html=True)
-
-    # Divider for subsections
-    st.markdown("<hr style='border:1px solid #5b5b5c'>", unsafe_allow_html=True)
-
-    # Subsection: Stimmungs-Analyse
-    st.subheader("Stimmungs-Analyse")
-    st.markdown("""
-        <p style='font-size:20px'>- <a href='https://huggingface.co/ssary/XLM-RoBERTa-German-sentiment' target='_blank' style='color:white;'>XLM-RoBERTa-German-sentiment</a></p>
     """, unsafe_allow_html=True)
 
     # Final Divider
